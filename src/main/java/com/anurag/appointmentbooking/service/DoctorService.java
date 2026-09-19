@@ -21,101 +21,101 @@ import java.util.Locale;
 @Service
 public class DoctorService {
 
-    private final DoctorRepository doctorRepository;
-    private final MedicalServiceRepository medicalServiceRepository;
+        private final DoctorRepository doctorRepository;
+        private final MedicalServiceRepository medicalServiceRepository;
 
-    public DoctorService(
-            DoctorRepository doctorRepository,
-            MedicalServiceRepository medicalServiceRepository) {
-        this.doctorRepository = doctorRepository;
-        this.medicalServiceRepository = null;
-    }
-
-    @Transactional
-    public DoctorResponse createDoctor(DoctorRequest request) {
-
-        String normalizedEmail = request.email()
-                .trim()
-                .toLowerCase(Locale.ROOT);
-
-        if (doctorRepository.existsByEmail(normalizedEmail)) {
-            throw new DuplicateResourceException(
-                    "A doctor with this email already exists");
+        public DoctorService(
+                        DoctorRepository doctorRepository,
+                        MedicalServiceRepository medicalServiceRepository) {
+                this.doctorRepository = doctorRepository;
+                this.medicalServiceRepository = medicalServiceRepository;
         }
 
-        Doctor doctor = new Doctor(
-                request.name().trim(),
-                request.specialization().trim(),
-                normalizedEmail);
+        @Transactional
+        public DoctorResponse createDoctor(DoctorRequest request) {
 
-        Doctor savedDoctor = doctorRepository.save(doctor);
+                String normalizedEmail = request.email()
+                                .trim()
+                                .toLowerCase(Locale.ROOT);
 
-        return mapToResponse(savedDoctor);
-    }
+                if (doctorRepository.existsByEmail(normalizedEmail)) {
+                        throw new DuplicateResourceException(
+                                        "A doctor with this email already exists");
+                }
 
-    private DoctorResponse mapToResponse(Doctor doctor) {
-        return new DoctorResponse(
-                doctor.getId(),
-                doctor.getName(),
-                doctor.getSpecialization(),
-                doctor.getEmail(),
-                doctor.isActive());
-    }
+                Doctor doctor = new Doctor(
+                                request.name().trim(),
+                                request.specialization().trim(),
+                                normalizedEmail);
 
-    @Transactional
-    public DoctorDetailsResponse assignService(
-            Long doctorId,
-            Long serviceId) {
-        Doctor doctor = doctorRepository.findById(doctorId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Doctor not found with ID: " + doctorId));
+                Doctor savedDoctor = doctorRepository.save(doctor);
 
-        MedicalService medicalService = medicalServiceRepository.findById(serviceId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Medical service not found with ID: " + serviceId));
-
-        if (!doctor.isActive()) {
-            throw new IllegalStateException(
-                    "Services cannot be assigned to an inactive doctor");
+                return mapToResponse(savedDoctor);
         }
 
-        if (!medicalService.isActive()) {
-            throw new IllegalStateException(
-                    "An inactive medical service cannot be assigned");
+        private DoctorResponse mapToResponse(Doctor doctor) {
+                return new DoctorResponse(
+                                doctor.getId(),
+                                doctor.getName(),
+                                doctor.getSpecialization(),
+                                doctor.getEmail(),
+                                doctor.isActive());
         }
 
-        boolean alreadyAssigned = doctor.getServices()
-                .stream()
-                .anyMatch(service -> service.getId().equals(serviceId));
+        @Transactional
+        public DoctorDetailsResponse assignService(
+                        Long doctorId,
+                        Long serviceId) {
+                Doctor doctor = doctorRepository.findById(doctorId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Doctor not found with ID: " + doctorId));
 
-        if (!alreadyAssigned) {
-            doctor.addService(medicalService);
+                MedicalService medicalService = medicalServiceRepository.findById(serviceId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Medical service not found with ID: " + serviceId));
+
+                if (!doctor.isActive()) {
+                        throw new IllegalStateException(
+                                        "Services cannot be assigned to an inactive doctor");
+                }
+
+                if (!medicalService.isActive()) {
+                        throw new IllegalStateException(
+                                        "An inactive medical service cannot be assigned");
+                }
+
+                boolean alreadyAssigned = doctor.getServices()
+                                .stream()
+                                .anyMatch(service -> service.getId().equals(serviceId));
+
+                if (!alreadyAssigned) {
+                        doctor.addService(medicalService);
+                }
+
+                return mapToDetailsResponse(doctor);
         }
 
-        return mapToDetailsResponse(doctor);
-    }
+        private DoctorDetailsResponse mapToDetailsResponse(Doctor doctor) {
 
-    private DoctorDetailsResponse mapToDetailsResponse(Doctor doctor) {
+                List<MedicalServiceResponse> services = doctor.getServices()
+                                .stream()
+                                .sorted(Comparator.comparing(
+                                                MedicalService::getName))
+                                .map(service -> new MedicalServiceResponse(
+                                                service.getId(),
+                                                service.getName(),
+                                                service.getDescription(),
+                                                service.getDurationMinutes(),
+                                                service.getPrice(),
+                                                service.isActive()))
+                                .toList();
 
-        List<MedicalServiceResponse> services = doctor.getServices()
-                .stream()
-                .sorted(Comparator.comparing(
-                        MedicalService::getName))
-                .map(service -> new MedicalServiceResponse(
-                        service.getId(),
-                        service.getName(),
-                        service.getDescription(),
-                        service.getDurationMinutes(),
-                        service.getPrice(),
-                        service.isActive()))
-                .toList();
-
-        return new DoctorDetailsResponse(
-                doctor.getId(),
-                doctor.getName(),
-                doctor.getSpecialization(),
-                doctor.getEmail(),
-                doctor.isActive(),
-                services);
-    }
+                return new DoctorDetailsResponse(
+                                doctor.getId(),
+                                doctor.getName(),
+                                doctor.getSpecialization(),
+                                doctor.getEmail(),
+                                doctor.isActive(),
+                                services);
+        }
 }
