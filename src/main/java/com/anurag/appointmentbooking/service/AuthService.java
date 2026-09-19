@@ -14,36 +14,36 @@ import java.util.Locale;
 @Service
 public class AuthService {
 
-    private final AuthenticationManager authenticationManager;
-    private final UserRepository userRepository;
+        private final AuthenticationManager authenticationManager;
+        private final UserRepository userRepository;
 
-    public AuthService(
-            AuthenticationManager authenticationManager,
-            UserRepository userRepository) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-    }
+        public AuthService(
+                        AuthenticationManager authenticationManager,
+                        UserRepository userRepository) {
+                this.authenticationManager = authenticationManager;
+                this.userRepository = userRepository;
+        }
 
-    public LoginResponse login(LoginRequest request) {
+        public LoginResponse login(LoginRequest request) {
 
-        String normalizedEmail = request.Email()
-                .trim()
-                .toLowerCase(Locale.ROOT);
+                String normalizedEmail = request.email()
+                                .trim()
+                                .toLowerCase(Locale.ROOT);
 
-        authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken.unauthenticated(
-                        normalizedEmail,
-                        request.password()));
+                authenticationManager.authenticate(
+                                UsernamePasswordAuthenticationToken.unauthenticated(
+                                                normalizedEmail,
+                                                request.password()));
 
-        User user = userRepository.findByEmail(normalizedEmail)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Authenticated user was not found"));
+                User user = userRepository.findByEmail(normalizedEmail)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Authenticated user was not found"));
 
-        return new LoginResponse(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getRole(),
-                "Login successful");
-    }
+                return new LoginResponse(
+                                user.getId(),
+                                user.getName(),
+                                user.getEmail(),
+                                user.getRole(),
+                                "Login successful");
+        }
 }
