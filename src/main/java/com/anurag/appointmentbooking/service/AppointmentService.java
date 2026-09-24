@@ -12,6 +12,9 @@ import com.anurag.appointmentbooking.repository.AppointmentRepository;
 import com.anurag.appointmentbooking.repository.DoctorRepository;
 import com.anurag.appointmentbooking.repository.MedicalServiceRepository;
 import com.anurag.appointmentbooking.repository.UserRepository;
+
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -193,4 +196,5 @@ public class AppointmentService {
                                 .map(this::mapToResponse)
                                 .toList();
         }
+        
 }

@@ -53,4 +53,19 @@ public interface AppointmentRepository
       @Param("requestedStart") LocalDateTime requestedStart,
       @Param("requestedEnd") LocalDateTime requestedEnd,
       @Param("cancelledStatus") AppointmentStatus cancelledStatus);
+
+      @Query("""
+        SELECT a
+        FROM Appointment a
+        WHERE a.doctor.id = :doctorId
+          AND a.status <> :cancelledStatus
+          AND a.startTime < :periodEnd
+          AND a.endTime > :periodStart
+        ORDER BY a.startTime ASC
+        """)
+List<Appointment> findDoctorAppointmentsForPeriod(
+        @Param("doctorId") Long doctorId,
+        @Param("periodStart") LocalDateTime periodStart,
+        @Param("periodEnd") LocalDateTime periodEnd,
+        @Param("cancelledStatus") AppointmentStatus cancelledStatus);
 }
