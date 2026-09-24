@@ -4,6 +4,9 @@ import com.anurag.appointmentbooking.dto.AppointmentRequest;
 import com.anurag.appointmentbooking.dto.AppointmentResponse;
 import com.anurag.appointmentbooking.service.AppointmentService;
 import jakarta.validation.Valid;
+
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,5 +34,23 @@ public class AppointmentController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<AppointmentResponse>> getMyAppointments(
+            Authentication authentication) {
+
+        List<AppointmentResponse> appointments = appointmentService.getMyAppointments(
+                authentication.getName());
+
+        return ResponseEntity.ok(appointments);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<AppointmentResponse>> getAllAppointments() {
+
+        List<AppointmentResponse> appointments = appointmentService.getAllAppointments();
+
+        return ResponseEntity.ok(appointments);
     }
 }

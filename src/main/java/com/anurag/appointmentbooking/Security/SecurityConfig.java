@@ -20,66 +20,74 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    public AuthenticationProvider authenticationProvider(
-            CustomUserDetailsService userDetailsService,
-            PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+        @Bean
+        public AuthenticationProvider authenticationProvider(
+                        CustomUserDetailsService userDetailsService,
+                        PasswordEncoder passwordEncoder) {
+                DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
 
-        provider.setPasswordEncoder(passwordEncoder);
+                provider.setPasswordEncoder(passwordEncoder);
 
-        return provider;
-    }
+                return provider;
+        }
 
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationProvider authenticationProvider) {
-        return new ProviderManager(authenticationProvider);
-    }
+        @Bean
+        public AuthenticationManager authenticationManager(
+                        AuthenticationProvider authenticationProvider) {
+                return new ProviderManager(authenticationProvider);
+        }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http,
-            AuthenticationProvider authenticationProvider) throws Exception {
+        @Bean
+        public SecurityFilterChain securityFilterChain(
+                        HttpSecurity http,
+                        AuthenticationProvider authenticationProvider) throws Exception {
 
-        return http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authenticationProvider(authenticationProvider)
-                .authorizeHttpRequests(authorize -> authorize
+                return http
+                                .csrf(AbstractHttpConfigurer::disable)
+                                .authenticationProvider(authenticationProvider)
+                                .authorizeHttpRequests(authorize -> authorize
 
-                        .dispatcherTypeMatchers(
-                                DispatcherType.ERROR)
-                        .permitAll()
+                                                .dispatcherTypeMatchers(
+                                                                DispatcherType.ERROR)
+                                                .permitAll()
 
-                        .requestMatchers(
-                                "/api/auth/register",
-                                "/api/auth/login")
-                        .permitAll()
+                                                .requestMatchers(
+                                                                "/api/auth/register",
+                                                                "/api/auth/login")
+                                                .permitAll()
 
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/api/doctors/**",
-                                "/api/services/**")
-                        .permitAll()
+                                                .requestMatchers(
+                                                                HttpMethod.GET,
+                                                                "/api/doctors/**",
+                                                                "/api/services/**")
+                                                .permitAll()
 
-                        .requestMatchers(
-                                "/api/doctors",
-                                "/api/doctors/**",
-                                "/api/services",
-                                "/api/services/**")
-                        .hasRole("ADMIN")
+                                                .requestMatchers(
+                                                                "/api/doctors",
+                                                                "/api/doctors/**",
+                                                                "/api/services",
+                                                                "/api/services/**")
+                                                .hasRole("ADMIN")
 
-                        .requestMatchers(
-                                "/api/appointments/**")
-                        .authenticated()
+                                                .requestMatchers(
+                                                                "/api/appointments/**")
+                                                .authenticated()
+                                                .requestMatchers(
+                                                                HttpMethod.GET,
+                                                                "/api/appointments",
+                                                                "/api/appointments/")
+                                                .hasRole("ADMIN")
 
-                        .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults())
-                .build();
-    }
+                                                .requestMatchers("/api/appointments/**")
+                                                .authenticated()
+
+                                                .anyRequest().authenticated())
+                                .httpBasic(Customizer.withDefaults())
+                                .build();
+        }
 }
