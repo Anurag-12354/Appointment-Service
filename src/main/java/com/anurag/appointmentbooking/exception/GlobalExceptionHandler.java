@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -106,4 +107,18 @@ public class GlobalExceptionHandler {
                                 .status(HttpStatus.UNAUTHORIZED)
                                 .body(error);
         }
+        @ExceptionHandler(AccessDeniedException.class)
+public ResponseEntity<ApiError> handleAccessDenied(
+        AccessDeniedException exception) {
+
+    ApiError error = new ApiError(
+            LocalDateTime.now(),
+            HttpStatus.FORBIDDEN.value(),
+            exception.getMessage(),
+            Map.of());
+
+    return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
+            .body(error);
+}
 }

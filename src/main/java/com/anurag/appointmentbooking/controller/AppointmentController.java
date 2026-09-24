@@ -2,6 +2,7 @@ package com.anurag.appointmentbooking.controller;
 
 import com.anurag.appointmentbooking.dto.AppointmentRequest;
 import com.anurag.appointmentbooking.dto.AppointmentResponse;
+import com.anurag.appointmentbooking.dto.RescheduleAppointmentRequest;
 import com.anurag.appointmentbooking.service.AppointmentService;
 import jakarta.validation.Valid;
 
@@ -53,4 +54,30 @@ public class AppointmentController {
 
         return ResponseEntity.ok(appointments);
     }
+    @PatchMapping("/{appointmentId}/cancel")
+public ResponseEntity<AppointmentResponse> cancelAppointment(
+        @PathVariable Long appointmentId,
+        Authentication authentication) {
+
+    AppointmentResponse response =
+            appointmentService.cancelAppointment(
+                    appointmentId,
+                    authentication.getName());
+
+    return ResponseEntity.ok(response);
+}
+@PatchMapping("/{appointmentId}/reschedule")
+public ResponseEntity<AppointmentResponse> rescheduleAppointment(
+        @PathVariable Long appointmentId,
+        @Valid @RequestBody RescheduleAppointmentRequest request,
+        Authentication authentication) {
+
+    AppointmentResponse response =
+            appointmentService.rescheduleAppointment(
+                    appointmentId,
+                    request,
+                    authentication.getName());
+
+    return ResponseEntity.ok(response);
+}
 }
